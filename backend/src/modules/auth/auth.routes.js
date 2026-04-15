@@ -9,6 +9,12 @@ router.post("/register", registerUser);
 // Login route
 router.post("/login", loginUser);
 
+// Route to get current user info (protected)
+router.get("/me", authenticateToken, (req, res) => {
+  res.status(200).json({ user: req.user });
+});
+
+// Route to test protected access
 router.get("/profile", authenticateToken, (req, res) => {
     res.json({
         message: "This is a protected route, you are authenticated!, Welcome to your profile",
