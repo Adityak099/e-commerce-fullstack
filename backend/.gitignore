@@ -1,3 +1,5 @@
 .env
 node_modues
 notes.md
+
+/src/generated/prisma
