@@ -24,8 +24,10 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
+    "nanoid": "^5.1.9",
     "pg": "^8.20.0",
-    "postgres": "^3.4.9"
+    "postgres": "^3.4.9",
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
