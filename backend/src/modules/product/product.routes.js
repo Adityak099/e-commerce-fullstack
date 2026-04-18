@@ -8,6 +8,7 @@ const router = express.Router();
 
 // --- PUBLIC ROUTES ---
 router.get("/", controller.getAllProducts);
+router.get("/search", controller.searchProducts);
 router.get("/:slug", controller.getProductBySlug);
 
 // --- SELLER & ADMIN ROUTES (Creation & Management) ---

@@ -12,7 +12,7 @@ export const createNewProduct = async (req, res) => {
     const { userId } = req.user;
 
     const product = await productService.addProduct(req.body, userId);
-
+    // console.log("Created Product:", product); // Debug log to verify product creation
     res.status(201).json({
       success: true,
       message: "Product created successfully",
@@ -53,6 +53,8 @@ export const getAllProducts = async (req, res) => {
  * @route   GET /api/products/:slug
  */
 export const getProductBySlug = async (req, res) => {
+  console.log("DEBUG: Entered getProductBySlug function");
+  console.log("DEBUG: Slug received:", req.params.slug);
   try {
     const product = await Product.findOne({ slug: req.params.slug });
 
@@ -134,6 +136,33 @@ export const adminGetAll = async (req, res) => {
   try {
     const products = await productService.listAllProductsForAdmin();
     res.status(200).json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * @desc   Search products by name, description, or category (Public)
+ * @route  GET /api/products/search?q=searchTerm
+ */
+export const searchProducts = async (req, res) => {
+  console.log("DEBUG: Entered searchProducts function");
+  console.log("DEBUG: Query received:", req.query.q);
+  try {
+    // Looks for ?q=productName in the URL
+    const { q } = req.query;
+
+    if (!q) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Search query is required" });
+    }
+
+    const products = await Product.find({
+      $text: { $search: q },
+    });
+
+    res.status(200).json({ success: true, count: products.length ,data: products });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

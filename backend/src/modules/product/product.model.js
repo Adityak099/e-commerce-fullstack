@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import { nanoid } from "nanoid";
+import slugify from "slugify";
 
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true, trim: true },
-    slug: { type: String, required: true, unique: true },
+    slug: { type: String, unique: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
     category: { type: String, required: true },
@@ -27,12 +29,16 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.pre("save", function (next) {
-  // Only generate a slug if it's a new document OR the name changed
-  // AND we don't already have a slug we want to keep
-  if (this.isModified("name") && !this.isModified("slug")) {
-    this.slug = `${slugify(this.name, { lower: true, strict: true })}-${nanoid(6)}`; // Generates a tiny, unique 6-character ID (nanoid) and appends it to the slugified name to ensure uniqueness
-  }
-  next();
+  // Logic fix: generate slug if it's a new name or slug doesn't exist yet
+  if (this.isModified("name") || !this.slug) {
+    this.slug = `${slugify(this.name, { lower: true, strict: true })}-${nanoid(6)}`;
+  } // Generates a tiny, unique 6-character ID (nanoid) and appends it to the slugified name to ensure uniqueness
+1});
+
+productSchema.index({
+  name: "text",
+  description: "text",
+  category: "text",
 });
 
 const Product = mongoose.model("Product", productSchema);

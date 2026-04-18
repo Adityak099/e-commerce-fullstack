@@ -10,25 +10,12 @@ import { Prisma } from "@prisma/client";
 
 // -- ADD PRODUCT --
 export const addProduct = async (productData, sellerId) => {
-  // 1. Generate a URL-friendly slug (e.g., "Makhana Pops" -> "makhana-pops-123456789")
-  const slug =
-    productData.name
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "") // Remove special chars
-      .replace(/[\s_-]+/g, "-") // Replace spaces/underscores with -
-      .replace(/^-+|-+$/g, "") +
-    "-" +
-    Date.now();
-
-  // 2. Format data for Prisma
   const formattedData = {
     ...productData,
-    slug,
-    sellerId,
-    // Ensure price is treated as a Decimal for accuracy
-    price: new Prisma.Decimal(productData.price),
+    seller: sellerId, // Changed to 'seller' to match your Mongoose schema
   };
+  // Delete the manual slug if it was passed in the request body
+  delete formattedData.slug;
 
   return await productRepo.createProduct(formattedData);
 };
