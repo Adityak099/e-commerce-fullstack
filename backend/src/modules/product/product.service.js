@@ -42,23 +42,35 @@ export const listAllProductsForAdmin = async () => {
 
 // -- UPDATE PRODUCT (With Ownership Check) --
 export const updateProduct = async (productId, userId, role, updateData) => {
-  // 1. Check if product exists and who owns it
+  // 1. Fetch product from repository
   const product = await productRepo.getProductById(productId);
 
   if (!product) {
     throw new Error("Product not found");
   }
 
-  // 2. Security: Only owner (Seller) or Admin can update
-  if (product.sellerId !== userId && role !== "ADMIN") {
+  // 2. Normalize IDs for comparison (String-to-String)
+  // We use .toString() because MongoDB IDs can be ObjectIds,
+  // while UUIDs from Postgres are strings.
+  const sellerIdInDb = product.seller ? product.seller.toString() : null;
+  const currentUserId = userId ? userId.toString() : null;
+
+  console.log("DEBUG: DB Seller ID:", sellerIdInDb);
+  console.log("DEBUG: Token User ID:", currentUserId);
+
+  // 3. Ownership Check: Only the owner (Seller) or an Admin can update
+  if (sellerIdInDb !== currentUserId && role !== "ADMIN") {
     throw new Error("Unauthorized: You do not own this product");
   }
 
-  // 3. Format price if it's being updated
-  if (updateData.price) {
-    updateData.price = new Prisma.Decimal(updateData.price);
+  // 4. Data Sanitization
+  // If the name is being updated, we remove the manual slug from updateData
+  // This allows the Mongoose model's 'pre-save' hook to generate a fresh SEO slug.
+  if (updateData.name) {
+    delete updateData.slug;
   }
 
+  // 5. Execute Update
   return await productRepo.updateProduct(productId, updateData);
 };
 

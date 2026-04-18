@@ -31,7 +31,7 @@ router.get(
 // --- OWNERSHIP PROTECTED ROUTES ---
 // We allow both roles here, but the Service layer will check if
 // the SELLER actually owns the specific ID they are trying to edit.
-router.put(
+router.patch(
   "/:id",
   authenticateToken,
   authorize("SELLER", "ADMIN"),
