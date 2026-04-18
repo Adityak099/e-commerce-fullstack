@@ -6,6 +6,7 @@ import connectDB from "./src/config/config.mongodb.js";
 import authRoutes from "./src/modules/auth/auth.routes.js";
 import { connectRedis } from "./src/config/config.redis.js";
 import cartRoutes from "./src/modules/cart/cart.routes.js";
+import orderRoutes from "./src/modules/orders/order.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,8 @@ app.use(json());
 app.use("/api/auth", authRoutes);
 // Mount the cart module routes
 app.use("/api/cart", cartRoutes);
+// Mount the order module routes
+app.use("/api/orders", orderRoutes);
 
 // Mount the product module routes
 // Note: We use dynamic import here to avoid circular dependency issues since the product module might also import something from app.js in the future (like a logger or config).
