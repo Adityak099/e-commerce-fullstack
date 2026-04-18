@@ -83,11 +83,13 @@ export const deleteProduct = async (productId, userId, role) => {
     throw new Error("Product not found");
   }
 
-  // 2. Security: Only owner (Seller) or Admin can delete
-  if (product.sellerId !== userId && role !== "ADMIN") {
-    throw new Error(
-      "Unauthorized: You do not have permission to delete this product",
-    );
+  // 2. Normalize IDs for comparison
+  const sellerIdInDb = product.seller ? product.seller.toString() : null;
+  const currentUserId = userId ? userId.toString() : null;
+
+  // 3. Security: Only owner (Seller) or Admin can delete
+  if (sellerIdInDb !== currentUserId && role !== "ADMIN") {
+    throw new Error("Unauthorized: You do not have permission to delete this product");
   }
 
   return await productRepo.deleteProduct(productId);
