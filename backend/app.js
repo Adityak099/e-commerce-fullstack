@@ -11,16 +11,28 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(json());
+
 // Mount the auth module routes
 app.use("/api/auth", authRoutes);
+
+// Mount the product module routes
+// Note: We use dynamic import here to avoid circular dependency issues since the product module might also import something from app.js in the future (like a logger or config).
+app.use(
+  "/api/products",
+  (await import("./src/modules/product/product.routes.js")).default,
+);
 
 // Basic route to test if the server is running
 app.get("/", (req, res) => {
   res.json({ message: "Backend is running!" });
 });
 
+// Test registration endpoint
 app.get("/register", (req, res) => {
-  res.json({ message: "This is the registration endpoint. Use POST /api/auth/register to register a new user." });
+  res.json({
+    message:
+      "This is the registration endpoint. Use POST /api/auth/register to register a new user.",
+  });
 });
 
 // Test database connection
