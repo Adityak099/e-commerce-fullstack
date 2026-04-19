@@ -34,3 +34,19 @@ export const checkout = async (req, res) => {
     });
   }
 };
+
+//Getting Order History of a user
+export const getOrderHistory = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const orders = await orderService.getUserOrderHistory(userId);
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

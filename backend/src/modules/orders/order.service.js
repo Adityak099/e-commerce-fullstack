@@ -49,3 +49,16 @@ export const placeOrder = async (userId, shippingAddress) => {
 
   return { pgOrderId, totalPrice: cart.totalPrice };
 };
+
+//Order History
+export const getUserOrderHistory = async (userId) => {
+  const query = `
+    SELECT id, total_price, status, created_at 
+    FROM orders 
+    WHERE user_id = $1 
+    ORDER BY created_at DESC
+  `;
+
+  const result = await pool.query(query, [userId]);
+  return result.rows;
+};
