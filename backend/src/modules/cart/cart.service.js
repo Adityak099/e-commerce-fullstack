@@ -3,6 +3,7 @@ import { redisClient } from "../../config/config.redis.js";
 const CART_PREFIX = "cart:";
 const CART_TTL = 60 * 60 * 24 * 7; // Cart expires in 7 days
 
+// Get cart for a user
 export const getCart = async (userId) => {
   const cartData = await redisClient.get(`${CART_PREFIX}${userId}`);
   return cartData ? JSON.parse(cartData) : { items: [], totalPrice: 0 };
@@ -40,7 +41,6 @@ export const addItemToCart = async (userId, product) => {
   return cart;
 };
 
-//Remove item from cart
 // Remove a single item by its Product ID
 export const removeItem = async (userId, productId) => {
   const cart = await getCart(userId);
@@ -68,4 +68,76 @@ export const removeItem = async (userId, productId) => {
 export const clearCart = async (userId) => {
   await redisClient.del(`cart:${userId}`);
   return { items: [], totalPrice: 0 };
+};
+
+//Merge carts (e.g., when a user logs in and has an existing cart in Redis)
+export const mergeCarts = async (userId, sessionId) => {
+  const guestKey = `cart:guest:${sessionId}`;
+  const userKey = `cart:${userId}`;
+
+  // 1. Fetch both carts from Redis
+  const [guestCartRaw, userCartRaw] = await Promise.all([
+    redisClient.get(guestKey),
+    redisClient.get(userKey),
+  ]);
+
+  if (!guestCartRaw) return; // Nothing to merge
+
+  const guestCart = JSON.parse(guestCartRaw);
+  const userCart = userCartRaw
+    ? JSON.parse(userCartRaw)
+    : { items: [], totalPrice: 0 };
+
+  // 2. Merge Logic: Combine items
+  guestCart.items.forEach((guestItem) => {
+    const existingItem = userCart.items.find(
+      (item) => item.productId === guestItem.productId,
+    );
+
+    if (existingItem) {
+      // If item exists in both, sum the quantities
+      existingItem.quantity += guestItem.quantity;
+    } else {
+      // If unique to guest, add to user cart
+      userCart.items.push(guestItem);
+    }
+  });
+
+  // 3. Recalculate Total Price
+  userCart.totalPrice = userCart.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  // 4. Save merged cart to User Key and DELETE Guest Key
+  await Promise.all([
+    redisClient.set(userKey, JSON.stringify(userCart), { EX: 86400 }),
+    redisClient.del(guestKey),
+  ]);
+
+  return userCart;
+};
+
+// Update quantity of an item in the cart
+// Update specific item quantity
+export const updateItemQuantity = async (userId, productId, quantity) => {
+  const cart = await getCart(userId);
+
+  const item = cart.items.find((item) => item.productId === productId);
+  if (!item) {
+    throw new Error("Item not found in cart");
+  }
+
+  // Update quantity (ensure it's a number)
+  item.quantity = Number(quantity);
+
+  // Recalculate total price for the whole cart
+  cart.totalPrice = cart.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  // Save back to Redis with 24h expiration
+  await redisClient.set(`cart:${userId}`, JSON.stringify(cart), { EX: 86400 });
+  return cart;
 };
