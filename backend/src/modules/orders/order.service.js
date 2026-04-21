@@ -2,6 +2,7 @@ import pool from "../../config/config.pgdb.js";
 import * as cartService from "../cart/cart.service.js";
 import OrderSnapshotSchema from "./order.model.js";
 
+
 /**
  * 1. Create Pending Order
  * Saves to Postgres and Mongo, but keeps status as 'PENDING'
@@ -45,6 +46,10 @@ export const createPendingOrder = async (userId, shippingAddress) => {
   }
 };
 
+/**
+ * 1.5 Attach Razorpay Order ID to the PostgreSQL record
+ * This is called right after creating the Razorpay order, before returning the order details to the frontend.
+ */
 export const attachRazorpayOrderId = async (orderId, razorpayOrderId) => {
   const query = `
     UPDATE orders
@@ -65,37 +70,55 @@ export const attachRazorpayOrderId = async (orderId, razorpayOrderId) => {
  * 2. Finalize Order
  * Called only after Razorpay signature is verified
  */
-export const finalizeOrder = async (razorpayOrderId, razorpayPaymentId) => {
+export const finalizeOrder = async (razorpayOrderId, paymentId) => {
   const client = await pool.connect();
+
   try {
     await client.query("BEGIN");
 
-    // 1. Update Order Status in PostgreSQL
-    const updateQuery = `
-      UPDATE orders 
-      SET status = 'COMPLETED', payment_id = $1 
-      WHERE razorpay_order_id = $2
-      RETURNING *;
-    `;
-    const result = await client.query(updateQuery, [
-      razorpayPaymentId,
-      razorpayOrderId,
-    ]);
+    const checkOrder = await client.query(
+      `
+        SELECT *
+        FROM orders
+        WHERE razorpay_order_id = $1
+        FOR UPDATE;
+      `,
+      [razorpayOrderId],
+    );
 
-    if (result.rowCount === 0) {
-      throw new Error("Order not found for finalization.");
+    if (checkOrder.rowCount === 0) {
+      throw new Error("Order not found.");
     }
 
-    const userId = result.rows[0].user_id;
+    const orderData = checkOrder.rows[0];
 
-    // 2. Clear the Redis Cart (Order is paid, cart no longer needed)
-    await cartService.clearCart(userId);
+    if (orderData.status === "COMPLETED") {
+      await client.query("COMMIT");
+      return { alreadyCompleted: true, order: orderData };
+    }
+
+    const result = await client.query(
+      `
+        UPDATE orders
+        SET status = 'COMPLETED', payment_id = $2
+        WHERE razorpay_order_id = $1
+        RETURNING *;
+      `,
+      [razorpayOrderId, paymentId],
+    );
 
     await client.query("COMMIT");
+
+    try {
+      await cartService.clearCart(orderData.user_id);
+      console.log(`Cart cleared for user: ${orderData.user_id}`);
+    } catch (cartError) {
+      console.error("Payment succeeded but failed to clear cart:", cartError);
+    }
+
     return result.rows[0];
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error finalizing order:", error);
     throw error;
   } finally {
     client.release();
