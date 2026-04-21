@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const OrderSchema = new mongoose.Schema({
+const OrderSnapshotSchema = new mongoose.Schema({
   pgOrderId: { type: String, required: true, unique: true }, // Link to Postgres
   userId: { type: String, required: true },
   items: [
@@ -19,4 +19,4 @@ const OrderSchema = new mongoose.Schema({
   orderedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("Order", OrderSchema);
+export default mongoose.model("Order", OrderSnapshotSchema);
