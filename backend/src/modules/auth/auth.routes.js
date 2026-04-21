@@ -1,5 +1,5 @@
 import e from "express";
-import { registerUser, loginUser } from "./auth.controller.js";
+import { registerUser, loginUser, logoutUser } from "./auth.controller.js";
 import { authenticateToken } from "./auth.middleware.js";
 
 const router = e.Router();
@@ -8,6 +8,8 @@ const router = e.Router();
 router.post("/register", registerUser);
 // Login route
 router.post("/login", loginUser);
+// Logout route
+router.post("/logout", authenticateToken, logoutUser);
 
 // Route to get current user info (protected)
 router.get("/me", authenticateToken, (req, res) => {

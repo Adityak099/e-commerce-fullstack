@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import * as authRepository from "./auth.repository.js";
+import { redisClient } from "../../config/config.redis.js";
+
+const TOKEN_BLACKLIST_PREFIX = "blacklisted-token:";
 
 export const register = async (name, email, password) => {
   // 1. Check if user exists
@@ -35,4 +38,25 @@ export const login = async (email, password) => {
   );
 
   return { token, user: { id: user.id, name: user.name, email: user.email } };
+};
+
+export const logout = async (token) => {
+  const decoded = jwt.decode(token);
+
+  if (!decoded?.exp) {
+    throw new Error("Invalid token");
+  }
+
+  const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+
+  if (ttl > 0) {
+    await redisClient.setEx(`${TOKEN_BLACKLIST_PREFIX}${token}`, ttl, "true");
+  }
+
+  return { message: "Logged out successfully" };
+};
+
+export const isTokenBlacklisted = async (token) => {
+  const result = await redisClient.get(`${TOKEN_BLACKLIST_PREFIX}${token}`);
+  return result === "true";
 };
