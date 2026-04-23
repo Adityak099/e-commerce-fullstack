@@ -4,6 +4,7 @@ export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const user = await authService.register(name, email, password);
+    console.log(`[AUTH] Registration successful for ${user.email} (id: ${user.id})`);
     res.status(201).json({ user });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -14,6 +15,7 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     const data = await authService.login(email, password);
+    console.log(`[AUTH] Login successful for ${data.user.email} (id: ${data.user.id})`);
     res.status(200).json(data);
   } catch (err) {
     res.status(400).json({ error: err.message });
