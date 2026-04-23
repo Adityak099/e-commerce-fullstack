@@ -34,3 +34,6 @@ out/
 # Database (if you store locally)
 *.db
 *.sqlite
+
+frontend/README.md
+*.md
