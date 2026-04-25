@@ -1,5 +1,4 @@
 import * as productService from "./product.service.js";
-import prisma from "../../config/config.prisma.js";
 import Product from "./product.model.js";
 
 /**
@@ -30,18 +29,6 @@ export const createNewProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   try {
     const products = await productService.listAllProducts();
-
-    // HANDSHAKE: Attach Seller info from PostgreSQL to MongoDB products
-    const enrichedProducts = await Promise.all(
-      products.map(async (product) => {
-        const seller = await prisma.user.findUnique({
-          where: { id: product.sellerId },
-          select: { name: true, email: true },
-        });
-        return { ...product, seller };
-      }),
-    );
-
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

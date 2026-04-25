@@ -29,11 +29,12 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.pre("save", function (next) {
-  // Logic fix: generate slug if it's a new name or slug doesn't exist yet
   if (this.isModified("name") || !this.slug) {
     this.slug = `${slugify(this.name, { lower: true, strict: true })}-${nanoid(6)}`;
-  } // Generates a tiny, unique 6-character ID (nanoid) and appends it to the slugified name to ensure uniqueness
-1});
+  }
+
+  next();
+});
 
 productSchema.index({
   name: "text",

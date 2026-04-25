@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config(); 
+dotenv.config();
 
 import express, { json } from "express";
 import cors from "cors";
@@ -7,7 +7,7 @@ import cors from "cors";
 // Configurations
 import pool from "./src/config/config.pgdb.js";
 import connectDB from "./src/config/config.mongodb.js";
-import { redisClient } from "./src/config/config.redis.js"; // This handles auto-connect
+import { ensureRedis, redisClient } from "./src/config/config.redis.js";
 
 // Routes
 import authRoutes from "./src/modules/auth/auth.routes.js";
@@ -20,9 +20,10 @@ const PORT = process.env.PORT || 5000;
 
 // 1. Initialize Database Connections
 connectDB(); // Connect to MongoDB
+ensureRedis();
 
 // 2. Global Middleware
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(json());
 
 // 3. API Routes
@@ -39,7 +40,7 @@ app.use(
 
 // 4. Health Check & Test Endpoints
 app.get("/", (req, res) => {
-  res.json({ message: "SwiftCart Backend is running!" });
+  res.json({ message: "FreshMart Backend is running!" });
 });
 
 // PostgreSQL Test

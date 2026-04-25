@@ -1,9 +1,12 @@
 import prisma from "../../config/config.prisma.js";
 
 export const findUserByEmail = async (email) => {
-  return prisma.user.findUnique({
+  if (!email) return null;
+
+  return prisma.user.findFirst({
     where: {
-      email,
+      email: email.trim().toLowerCase(),
+      isActive: true,
     },
   });
 };

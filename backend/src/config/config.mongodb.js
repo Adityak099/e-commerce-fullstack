@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import Product from "../modules/product/product.model.js";
-
-dotenv.config();
 
 const connectDB = async () => {
   try {

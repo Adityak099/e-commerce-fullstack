@@ -16,7 +16,7 @@ export const registerUser = async (userData) => {
     const response = await api.post("/auth/register", userData);
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: "Connection to SwiftCart failed" };
+    throw error.response?.data || { message: "Connection to FreshMart failed" };
   }
 };
 
@@ -26,7 +26,10 @@ export const registerUser = async (userData) => {
  */
 export const loginUser = async (credentials) => {
   try {
-    const response = await api.post("/auth/login", credentials);
+    const response = await api.post("/auth/login", {
+      email: credentials.email?.trim().toLowerCase(),
+      password: credentials.password,
+    });
 
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
@@ -40,7 +43,13 @@ export const loginUser = async (credentials) => {
 
     return response.data;
   } catch (error) {
-    throw error.response?.data || { message: "Login attempt failed" };
+    throw (
+      error.response?.data || {
+        message:
+          error.message ||
+          "Login attempt failed. Please check whether the backend is running.",
+      }
+    );
   }
 };
 
@@ -52,7 +61,10 @@ export const logoutUser = async () => {
   try {
     await api.post("/auth/logout");
   } catch (error) {
-    console.error("Backend logout error (Redis):", error);
+    console.warn(
+      "Backend logout request failed, clearing local session anyway.",
+      error,
+    );
   } finally {
     localStorage.removeItem("token");
     localStorage.removeItem("user");

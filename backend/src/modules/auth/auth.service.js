@@ -1,13 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import * as authRepository from "./auth.repository.js";
-import { redisClient } from "../../config/config.redis.js";
+import { ensureRedis } from "../../config/config.redis.js";
 
 const TOKEN_BLACKLIST_PREFIX = "blacklisted-token:";
 
 export const register = async (name, email, password) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+
   // 1. Check if user exists
-  const existingUser = await authRepository.findUserByEmail(email);
+  const existingUser = await authRepository.findUserByEmail(normalizedEmail);
   if (existingUser) throw new Error("User already exists");
 
   // 2. Hash password
@@ -16,14 +18,16 @@ export const register = async (name, email, password) => {
   // 3. Save to DB
   return await authRepository.createUser({
     name,
-    email,
+    email: normalizedEmail,
     password: hashedPassword,
   });
 };
 
 export const login = async (email, password) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+
   // 1. Find user
-  const user = await authRepository.findUserByEmail(email);
+  const user = await authRepository.findUserByEmail(normalizedEmail);
   if (!user) throw new Error("Invalid credentials");
 
   // 2. Check password
@@ -48,15 +52,21 @@ export const logout = async (token) => {
   }
 
   const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+  const redisClient = await ensureRedis();
 
-  if (ttl > 0) {
-    await redisClient.setEx(`${TOKEN_BLACKLIST_PREFIX}${token}`, ttl, "true");
+  if (ttl > 0 && redisClient) {
+    await redisClient.setex(`${TOKEN_BLACKLIST_PREFIX}${token}`, ttl, "true");
   }
 
   return { message: "Logged out successfully" };
 };
 
 export const isTokenBlacklisted = async (token) => {
+  const redisClient = await ensureRedis();
+  if (!redisClient) {
+    return false;
+  }
+
   const result = await redisClient.get(`${TOKEN_BLACKLIST_PREFIX}${token}`);
   return result === "true";
 };

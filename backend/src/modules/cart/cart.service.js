@@ -1,16 +1,28 @@
-import { redisClient } from "../../config/config.redis.js";
+import { ensureRedis } from "../../config/config.redis.js";
 
 const CART_PREFIX = "cart:";
 const CART_TTL = 60 * 60 * 24 * 7; // Cart expires in 7 days
 
+const getRedisClient = async () => {
+  const redisClient = await ensureRedis();
+
+  if (!redisClient) {
+    throw new Error("Cart storage is currently unavailable");
+  }
+
+  return redisClient;
+};
+
 // Get cart for a user
 export const getCart = async (userId) => {
+  const redisClient = await getRedisClient();
   const cartData = await redisClient.get(`${CART_PREFIX}${userId}`);
   return cartData ? JSON.parse(cartData) : { items: [], totalPrice: 0 };
 };
 
 // Add or update item in cart
 export const addItemToCart = async (userId, product) => {
+  const redisClient = await getRedisClient();
   const cart = await getCart(userId);
 
   // Check if item already exists
@@ -33,7 +45,7 @@ export const addItemToCart = async (userId, product) => {
   );
 
   // Save to Redis with Expiry
-  await redisClient.setEx(
+  await redisClient.setex(
     `${CART_PREFIX}${userId}`,
     CART_TTL,
     JSON.stringify(cart),
@@ -43,6 +55,7 @@ export const addItemToCart = async (userId, product) => {
 
 // Remove a single item by its Product ID
 export const removeItem = async (userId, productId) => {
+  const redisClient = await getRedisClient();
   const cart = await getCart(userId);
 
   // Filter out the item we want to delete
@@ -60,18 +73,20 @@ export const removeItem = async (userId, productId) => {
   );
 
   // Save the updated cart back to Redis
-  await redisClient.set(`cart:${userId}`, JSON.stringify(cart), { EX: 86400 });
+  await redisClient.set(`${CART_PREFIX}${userId}`, JSON.stringify(cart), "EX", 86400);
   return cart;
 };
 
 // Completely wipe the cart (Used after Checkout)
 export const clearCart = async (userId) => {
-  await redisClient.del(`cart:${userId}`);
+  const redisClient = await getRedisClient();
+  await redisClient.del(`${CART_PREFIX}${userId}`);
   return { items: [], totalPrice: 0 };
 };
 
 //Merge carts (e.g., when a user logs in and has an existing cart in Redis)
 export const mergeCarts = async (userId, sessionId) => {
+  const redisClient = await getRedisClient();
   const guestKey = `cart:guest:${sessionId}`;
   const userKey = `cart:${userId}`;
 
@@ -111,7 +126,7 @@ export const mergeCarts = async (userId, sessionId) => {
 
   // 4. Save merged cart to User Key and DELETE Guest Key
   await Promise.all([
-    redisClient.set(userKey, JSON.stringify(userCart), { EX: 86400 }),
+    redisClient.set(userKey, JSON.stringify(userCart), "EX", 86400),
     redisClient.del(guestKey),
   ]);
 
@@ -121,6 +136,7 @@ export const mergeCarts = async (userId, sessionId) => {
 // Update quantity of an item in the cart
 // Update specific item quantity
 export const updateItemQuantity = async (userId, productId, quantity) => {
+  const redisClient = await getRedisClient();
   const cart = await getCart(userId);
 
   const item = cart.items.find((item) => item.productId === productId);
@@ -138,6 +154,6 @@ export const updateItemQuantity = async (userId, productId, quantity) => {
   );
 
   // Save back to Redis with 24h expiration
-  await redisClient.set(`cart:${userId}`, JSON.stringify(cart), { EX: 86400 });
+  await redisClient.set(`${CART_PREFIX}${userId}`, JSON.stringify(cart), "EX", 86400);
   return cart;
 };
