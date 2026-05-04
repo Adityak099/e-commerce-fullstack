@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ProductView from "@/components/product/ProductView";
-import { getProductById } from "@/services/productService";
+import { getProductById } from "@/services/product.Service";
 
 export default async function ProductDetailPage({ params }) {
   const { id } = await params;

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/services/auth.service";
-const data = await registerUser(formData);
 import {
   Mail,
   Lock,

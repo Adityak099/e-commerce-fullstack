@@ -1,5 +1,6 @@
-// src/services/auth.service.js
+// src/services/auth.Service.js
 import api from "../lib/api";
+
 
 const emitAuthChange = () => {
   if (typeof window !== "undefined") {

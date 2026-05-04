@@ -1,10 +1,12 @@
 import "./globals.css";
+import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 
 export const metadata = {
   title: "FreshMart - Fresh Groceries Delivered Fast",
   description:
     "Quality organic groceries delivered to your door. Shop fresh vegetables, fruits, dairy, and more at FreshMart.",
-  generator: "v0.app",
+  generator: "Next.js",
   icons: {
     icon: [
       {
@@ -26,9 +28,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="bg-background" suppressHydrationWarning>
-      <body className="font-sans antialiased">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className="font-sans antialiased bg-background text-foreground">
+        <Navbar />
+
+        <main className="min-h-[calc(100vh-140px)]">   {/* Footer ke liye space */}
+          {children}
+        </main>
+        
+
+        <Footer />
       </body>
     </html>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { isAuthenticated } from "@/services/auth.service";
-import { getCart, subscribeToCartChanges } from "@/services/cart.service";
+import { getCart, subscribeToCartChanges } from "@/services/cart.Service";
 
 const EMPTY_CART = { items: [], totalPrice: 0 };
 
