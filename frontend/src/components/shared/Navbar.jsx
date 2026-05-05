@@ -15,7 +15,11 @@ import {
   Settings,
 } from "lucide-react";
 
-import { isAuthenticated, getCurrentUser, logoutUser } from "@/services/auth.service";
+import {
+  isAuthenticated,
+  getCurrentUser,
+  logoutUser,
+} from "@/services/auth.service";
 import { useCartSummary } from "@/hooks/useCartSummary";
 
 export default function Navbar() {
@@ -66,7 +70,6 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center font-bold text-xl text-primary-foreground shadow-md">
@@ -81,7 +84,9 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-secondary rounded-2xl cursor-pointer hover:bg-secondary/80 transition-colors">
             <MapPin className="w-4 h-4 text-primary" />
             <div className="text-sm">
-              <p className="text-muted-foreground text-xs -mb-0.5">Deliver to</p>
+              <p className="text-muted-foreground text-xs -mb-0.5">
+                Deliver to
+              </p>
               <p className="font-medium flex items-center gap-1">
                 Patna, Bihar <ChevronDown className="w-3 h-3" />
               </p>
@@ -89,7 +94,10 @@ export default function Navbar() {
           </div>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-6">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-xl mx-6"
+          >
             <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
@@ -104,9 +112,24 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-8">
-            <Link href="/" className="font-medium hover:text-primary transition-colors">Home</Link>
-            <Link href="/products" className="font-medium hover:text-primary transition-colors">Shop</Link>
-            <Link href="/offers" className="font-medium hover:text-primary transition-colors">Offers</Link>
+            <Link
+              href="/"
+              className="font-medium hover:text-primary transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              href="/products"
+              className="font-medium hover:text-primary transition-colors"
+            >
+              Shop
+            </Link>
+            <Link
+              href="/offers"
+              className="font-medium hover:text-primary transition-colors"
+            >
+              Offers
+            </Link>
           </div>
 
           {/* Right Side */}
@@ -117,12 +140,17 @@ export default function Navbar() {
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
                     {user.name?.[0]?.toUpperCase()}
                   </div>
-                  <span className="font-medium text-sm">{user.name?.split(" ")[0]}</span>
+                  <span className="font-medium text-sm">
+                    {user.name?.split(" ")[0]}
+                  </span>
                   <ChevronDown className="w-4 h-4" />
                 </button>
 
                 <div className="absolute right-0 mt-2 w-52 bg-card border border-border rounded-2xl shadow-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                  <Link href="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-secondary text-sm">
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-secondary text-sm"
+                  >
                     <Settings className="w-4 h-4" /> Account Settings
                   </Link>
                   <button
@@ -163,7 +191,11 @@ export default function Navbar() {
               className="lg:hidden p-3 hover:bg-secondary rounded-2xl transition-colors"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -187,13 +219,25 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-border py-4 space-y-1 pb-6">
-            <Link href="/" className="block px-4 py-3 hover:bg-secondary rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/"
+              className="block px-4 py-3 hover:bg-secondary rounded-xl"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Home
             </Link>
-            <Link href="/products" className="block px-4 py-3 hover:bg-secondary rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/products"
+              className="block px-4 py-3 hover:bg-secondary rounded-xl"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Shop
             </Link>
-            <Link href="/offers" className="block px-4 py-3 hover:bg-secondary rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+            <Link
+              href="/offers"
+              className="block px-4 py-3 hover:bg-secondary rounded-xl"
+              onClick={() => setMobileMenuOpen(false)}
+            >
               Offers
             </Link>
 
@@ -201,8 +245,14 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <div className="px-4 py-2 text-sm text-muted-foreground">Signed in as {user.name}</div>
-                <Link href="/profile" className="block px-4 py-3 hover:bg-secondary rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+                <div className="px-4 py-2 text-sm text-muted-foreground">
+                  Signed in as {user.name}
+                </div>
+                <Link
+                  href="/profile"
+                  className="block px-4 py-3 hover:bg-secondary rounded-xl"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Profile
                 </Link>
                 <button
@@ -214,10 +264,18 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link href="/login" className="block px-4 py-3 hover:bg-secondary rounded-xl" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/login"
+                  className="block px-4 py-3 hover:bg-secondary rounded-xl"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Login
                 </Link>
-                <Link href="/register" className="block mx-4 mt-2 bg-primary text-primary-foreground py-3 rounded-2xl text-center font-medium" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/register"
+                  className="block mx-4 mt-2 bg-primary text-primary-foreground py-3 rounded-2xl text-center font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Create Account
                 </Link>
               </>

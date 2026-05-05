@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import api from "@/lib/api";
 import ProductCard from "@/components/product/ProductCard";
 import { ArrowLeft } from "lucide-react";
+import { getProducts } from "@/services/product.Service";
 
 export default function CategoryPage() {
   const { slug } = useParams();
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const formatSlug = (str) => {
     if (!str) return "";
@@ -20,26 +21,27 @@ export default function CategoryPage() {
       .join(" ");
   };
 
+  const normalizeCategory = (value) =>
+    String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
   useEffect(() => {
     const fetchAndFilterProducts = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/products");
-
-        // Handle different response structures gracefully to ensure we always get an array of products to work with regardless of how the backend formats its response (especially if it wraps data in a 'data' field or uses a 'products' field).
-        const allProducts = Array.isArray(response.data)
-          ? response.data
-          : Array.isArray(response.data.data)
-            ? response.data.data
-            : response.data.products || [];
-
-        // Filter products by category, ignoring case and handling potential formatting differences
+        setError("");
+        const allProducts = await getProducts();
         const filtered = allProducts.filter(
-          (p) => p.category.toLowerCase() === slug.toLowerCase(),
+          (product) => normalizeCategory(product.category) === slug.toLowerCase(),
         );
 
         setProducts(filtered);
       } catch (error) {
+        setError("Products are temporarily unavailable right now.");
         console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
@@ -75,10 +77,16 @@ export default function CategoryPage() {
         </div>
       </div>
 
+      {error ? (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {error}
+        </div>
+      ) : null}
+
       {products.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (

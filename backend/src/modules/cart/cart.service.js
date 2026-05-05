@@ -3,6 +3,19 @@ import { ensureRedis } from "../../config/config.redis.js";
 const CART_PREFIX = "cart:";
 const CART_TTL = 60 * 60 * 24 * 7; // Cart expires in 7 days
 
+const getCartItemId = (item) =>
+  String(item.productId || item.id || item._id || item.slug || "");
+
+const normalizeCartItem = (item) => ({
+  ...item,
+  productId: getCartItemId(item),
+});
+
+const normalizeCart = (cart) => ({
+  ...cart,
+  items: Array.isArray(cart.items) ? cart.items.map(normalizeCartItem) : [],
+});
+
 const getRedisClient = async () => {
   const redisClient = await ensureRedis();
 
@@ -17,25 +30,32 @@ const getRedisClient = async () => {
 export const getCart = async (userId) => {
   const redisClient = await getRedisClient();
   const cartData = await redisClient.get(`${CART_PREFIX}${userId}`);
-  return cartData ? JSON.parse(cartData) : { items: [], totalPrice: 0 };
+  return cartData
+    ? normalizeCart(JSON.parse(cartData))
+    : { items: [], totalPrice: 0 };
 };
 
 // Add or update item in cart
 export const addItemToCart = async (userId, product) => {
   const redisClient = await getRedisClient();
   const cart = await getCart(userId);
+  const productId = getCartItemId(product);
+  const normalizedProduct = {
+    ...product,
+    productId,
+  };
 
   // Check if item already exists
   const existingItemIndex = cart.items.findIndex(
-    (item) => item.productId === product.productId,
+    (item) => getCartItemId(item) === productId,
   );
 
   if (existingItemIndex > -1) {
     // Update quantity
-    cart.items[existingItemIndex].quantity += product.quantity;
+    cart.items[existingItemIndex].quantity += normalizedProduct.quantity;
   } else {
     // Add new item
-    cart.items.push(product);
+    cart.items.push(normalizedProduct);
   }
 
   // Recalculate total price
@@ -57,10 +77,13 @@ export const addItemToCart = async (userId, product) => {
 export const removeItem = async (userId, productId) => {
   const redisClient = await getRedisClient();
   const cart = await getCart(userId);
+  const normalizedProductId = String(productId);
 
   // Filter out the item we want to delete
   const initialCount = cart.items.length;
-  cart.items = cart.items.filter((item) => item.productId !== productId);
+  cart.items = cart.items.filter(
+    (item) => getCartItemId(item) !== normalizedProductId,
+  );
 
   if (cart.items.length === initialCount) {
     throw new Error("Item not found in cart");
@@ -73,7 +96,12 @@ export const removeItem = async (userId, productId) => {
   );
 
   // Save the updated cart back to Redis
-  await redisClient.set(`${CART_PREFIX}${userId}`, JSON.stringify(cart), "EX", 86400);
+  await redisClient.set(
+    `${CART_PREFIX}${userId}`,
+    JSON.stringify(cart),
+    "EX",
+    86400,
+  );
   return cart;
 };
 
@@ -106,7 +134,7 @@ export const mergeCarts = async (userId, sessionId) => {
   // 2. Merge Logic: Combine items
   guestCart.items.forEach((guestItem) => {
     const existingItem = userCart.items.find(
-      (item) => item.productId === guestItem.productId,
+      (item) => getCartItemId(item) === getCartItemId(guestItem),
     );
 
     if (existingItem) {
@@ -114,7 +142,10 @@ export const mergeCarts = async (userId, sessionId) => {
       existingItem.quantity += guestItem.quantity;
     } else {
       // If unique to guest, add to user cart
-      userCart.items.push(guestItem);
+      userCart.items.push({
+        ...guestItem,
+        productId: getCartItemId(guestItem),
+      });
     }
   });
 
@@ -138,8 +169,11 @@ export const mergeCarts = async (userId, sessionId) => {
 export const updateItemQuantity = async (userId, productId, quantity) => {
   const redisClient = await getRedisClient();
   const cart = await getCart(userId);
+  const normalizedProductId = String(productId);
 
-  const item = cart.items.find((item) => item.productId === productId);
+  const item = cart.items.find(
+    (item) => getCartItemId(item) === normalizedProductId,
+  );
   if (!item) {
     throw new Error("Item not found in cart");
   }
@@ -154,6 +188,11 @@ export const updateItemQuantity = async (userId, productId, quantity) => {
   );
 
   // Save back to Redis with 24h expiration
-  await redisClient.set(`${CART_PREFIX}${userId}`, JSON.stringify(cart), "EX", 86400);
+  await redisClient.set(
+    `${CART_PREFIX}${userId}`,
+    JSON.stringify(cart),
+    "EX",
+    86400,
+  );
   return cart;
 };

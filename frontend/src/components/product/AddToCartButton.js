@@ -16,9 +16,11 @@ export default function AddToCartButton({ product, className = "" }) {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
 
+  const productId = product.id || product._id || product.slug;
+
   const cartItem = useMemo(
-    () => (cart.items || []).find((item) => item.productId === product.id),
-    [cart, product.id],
+    () => (cart.items || []).find((item) => item.productId === productId),
+    [cart, productId],
   );
 
   const quantity = Number(cartItem?.quantity || 0);
@@ -45,7 +47,7 @@ export default function AddToCartButton({ product, className = "" }) {
     try {
       setLoading(true);
       await addToCart({
-        productId: product.id,
+        productId,
         name: product.name,
         price: product.price,
         quantity: 1,
@@ -74,7 +76,7 @@ export default function AddToCartButton({ product, className = "" }) {
         return;
       }
 
-      await updateCartItemQuantity(product.id, quantity + 1);
+      await updateCartItemQuantity(productId, quantity + 1);
     } catch (error) {
       setFeedbackMessage(
         error.response?.data?.error || error.message || "Could not update item",
@@ -93,11 +95,11 @@ export default function AddToCartButton({ product, className = "" }) {
       setLoading(true);
 
       if (quantity <= 1) {
-        await removeCartItem(product.id);
+        await removeCartItem(productId);
         return;
       }
 
-      await updateCartItemQuantity(product.id, quantity - 1);
+      await updateCartItemQuantity(productId, quantity - 1);
     } catch (error) {
       setFeedbackMessage(
         error.response?.data?.error || error.message || "Could not update item",

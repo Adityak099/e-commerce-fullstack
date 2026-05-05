@@ -5,9 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import AddToCartButton from "../product/AddToCartButton";   // ← Corrected Import
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+import AddToCartButton from "../product/AddToCartButton";
+import { getFeaturedProducts } from "@/services/product.Service";
 
 export default function BestSellers() {
   const [products, setProducts] = useState([]);
@@ -21,13 +20,8 @@ export default function BestSellers() {
 
     const fetchProducts = async () => {
       try {
-        const res = await fetch(`${API_URL}/products`);
-        if (!res.ok) throw new Error("Failed to load products");
-
-        const data = await res.json();
-        const rawProducts = Array.isArray(data) ? data : data?.data || [];
-
-        setProducts(rawProducts.slice(0, 8));
+        const featuredProducts = await getFeaturedProducts(8);
+        setProducts(featuredProducts);
       } catch (err) {
         setError("Products are temporarily unavailable. Please check your backend.");
         console.error(err);
@@ -68,7 +62,7 @@ export default function BestSellers() {
               ))
             : products.map((product) => (
                 <div
-                  key={product._id || product.id}
+                  key={product.id}
                   className="bg-background border border-border rounded-3xl overflow-hidden hover:shadow-xl transition-all group"
                 >
                   <div className="h-52 bg-muted flex items-center justify-center p-6">

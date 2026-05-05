@@ -93,8 +93,21 @@ export const removeFromCart = async (req, res) => {
   try {
     const userId = req.user.userId;
     const { productId } = req.params;
+    const cartBeforeDelete = await cartService.getCart(userId);
+
+    console.log("[CART] Remove requested", {
+      userId,
+      requestedProductId: String(productId),
+      cartProductIds: cartBeforeDelete.items.map((item) => item.productId),
+    });
 
     const updatedCart = await cartService.removeItem(userId, productId);
+
+    console.log("[CART] Remove successful", {
+      userId,
+      removedProductId: String(productId),
+      remainingProductIds: updatedCart.items.map((item) => item.productId),
+    });
 
     res.status(200).json({
       success: true,
@@ -102,6 +115,11 @@ export const removeFromCart = async (req, res) => {
       data: updatedCart,
     });
   } catch (error) {
+    console.error("[CART] Remove failed", {
+      userId: req.user?.userId,
+      requestedProductId: String(req.params?.productId || ""),
+      error: error.message,
+    });
     res.status(404).json({ success: false, error: error.message });
   }
 };
