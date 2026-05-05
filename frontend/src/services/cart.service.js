@@ -13,7 +13,13 @@ export const getCart = async () => {
   return response.data?.data || { items: [], totalPrice: 0 };
 };
 
-export const addToCart = async ({ productId, name, price, quantity, image }) => {
+export const addToCart = async ({
+  productId,
+  name,
+  price,
+  quantity,
+  image,
+}) => {
   const response = await api.post("/cart/items", {
     productId,
     name,
@@ -60,3 +66,12 @@ export const formatCartPrice = (value) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
+
+  
+export const searchProducts = async (query) => {
+  // Use the 'api' instance we fixed with the token interceptor
+  const response = await api.get(
+    `/products/search?q=${encodeURIComponent(query)}`,
+  );
+  return response.data; // This returns { success: true, data: [...] }
+};

@@ -133,23 +133,32 @@ export const adminGetAll = async (req, res) => {
  * @route  GET /api/products/search?q=searchTerm
  */
 export const searchProducts = async (req, res) => {
-  console.log("DEBUG: Entered searchProducts function");
-  console.log("DEBUG: Query received:", req.query.q);
   try {
-    // Looks for ?q=productName in the URL
     const { q } = req.query;
 
     if (!q) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Search query is required" });
+      return res.status(400).json({
+        success: false,
+        error: "Search query is required",
+      });
     }
 
+    // REGEX SEARCH LOGIC:
+    // This finds 'q' anywhere inside the string.
+    // $options: "i" makes it case-insensitive (finds 'Apple' even if user types 'apple').
     const products = await Product.find({
-      $text: { $search: q },
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { category: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+      ],
     });
 
-    res.status(200).json({ success: true, count: products.length ,data: products });
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

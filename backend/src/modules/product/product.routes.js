@@ -9,6 +9,16 @@ const router = express.Router();
 // --- PUBLIC ROUTES ---
 router.get("/", controller.getAllProducts);
 router.get("/search", controller.searchProducts);
+
+// --- SELLER & ADMIN ROUTES (Get my products must come before /:slug) ---
+router.get(
+  "/my-products",
+  authenticateToken,
+  authorize("SELLER"),
+  controller.getSellerProducts,
+);
+
+// --- PUBLIC ROUTES (Dynamic routes last) ---
 router.get("/:slug", controller.getProductBySlug);
 
 // --- SELLER & ADMIN ROUTES (Creation & Management) ---
@@ -19,13 +29,6 @@ router.post(
   authorize("SELLER", "ADMIN"),
   validateProduct,
   controller.createNewProduct,
-);
-
-router.get(
-  "/my-products",
-  authenticateToken,
-  authorize("SELLER"),
-  controller.getSellerProducts,
 );
 
 // --- OWNERSHIP PROTECTED ROUTES ---

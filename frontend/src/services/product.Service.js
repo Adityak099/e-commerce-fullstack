@@ -103,3 +103,27 @@ export const addProductToCart = async (product, quantity = 1) => {
 
   return response.data;
 };
+
+export const searchProductsLive = async (query) => {
+  if (!query.trim()) {
+    return [];
+  }
+
+  const response = await fetch(
+    `${API_URL}/products/search?q=${encodeURIComponent(query)}`,
+    {
+      cache: "no-store",
+    },
+  );
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error || payload?.message || "Unable to search products",
+    );
+  }
+
+  const rawProducts = Array.isArray(payload) ? payload : payload?.data || [];
+  return rawProducts.map(normalizeProduct).filter(Boolean);
+};
