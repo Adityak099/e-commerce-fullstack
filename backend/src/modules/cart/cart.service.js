@@ -100,7 +100,7 @@ export const removeItem = async (userId, productId) => {
     `${CART_PREFIX}${userId}`,
     JSON.stringify(cart),
     "EX",
-    86400,
+    CART_TTL,
   );
   return cart;
 };
@@ -157,7 +157,7 @@ export const mergeCarts = async (userId, sessionId) => {
 
   // 4. Save merged cart to User Key and DELETE Guest Key
   await Promise.all([
-    redisClient.set(userKey, JSON.stringify(userCart), "EX", 86400),
+    redisClient.set(userKey, JSON.stringify(userCart), "EX", CART_TTL),
     redisClient.del(guestKey),
   ]);
 
@@ -187,12 +187,12 @@ export const updateItemQuantity = async (userId, productId, quantity) => {
     0,
   );
 
-  // Save back to Redis with 24h expiration
+  // Save back to Redis with 7d expiration
   await redisClient.set(
     `${CART_PREFIX}${userId}`,
     JSON.stringify(cart),
     "EX",
-    86400,
+    CART_TTL,
   );
   return cart;
 };
