@@ -21,11 +21,15 @@ import paymentRoutes from "./src/modules/payment/payment.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const normalizeOrigin = (origin) => origin?.replace(/\/$/, "");
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://freshmart-ecom.vercel.app",
   process.env.FRONTEND_URL,
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
-].filter(Boolean);
+]
+  .filter(Boolean)
+  .map(normalizeOrigin);
 
 // 1. Initialize Database Connections
 connectDB(); // Connect to MongoDB
@@ -35,7 +39,7 @@ ensureRedis();
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
         callback(null, true);
         return;
       }
