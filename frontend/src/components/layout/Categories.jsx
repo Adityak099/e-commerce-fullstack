@@ -67,7 +67,7 @@ const allCategories = [
 
 export default function Categories() {
   return (
-    <section className="py-8 px-4 sm:px-6 lg:px-8 bg-card">
+    <section id="categories" className="py-8 px-4 sm:px-6 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6 px-1">
           <h2 className="text-2xl font-bold text-foreground">

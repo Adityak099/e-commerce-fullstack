@@ -13,7 +13,6 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
           {/* Left Content */}
           <div className="text-center lg:text-left space-y-6">
             <div className="inline-flex items-center gap-2 px-5 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
@@ -27,7 +26,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              Quality fruits, vegetables, dairy, and more at the best prices. 
+              Quality fruits, vegetables, dairy, and more at the best prices.
               Delivered fast to your doorstep.
             </p>
 
@@ -40,7 +39,7 @@ export default function Hero() {
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
-                href="/products"
+                href="#categories"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-border hover:border-primary hover:text-primary font-semibold rounded-2xl transition-all"
               >
                 Browse Categories
@@ -49,11 +48,19 @@ export default function Hero() {
 
             <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-6">
               <div className="flex items-center gap-2">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />)}
-                <span className="text-sm text-muted-foreground">4.9/5 Rating</span>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                  />
+                ))}
+                <span className="text-sm text-muted-foreground">
+                  4.9/5 Rating
+                </span>
               </div>
               <div className="text-sm text-muted-foreground">
-                <span className="font-bold text-foreground">50K+</span> Happy Customers
+                <span className="font-bold text-foreground">50K+</span> Happy
+                Customers
               </div>
             </div>
           </div>
@@ -62,10 +69,9 @@ export default function Hero() {
           <div className="hidden lg:flex justify-center">
             <div className="relative w-full max-w-md">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl rotate-6" />
-              
+
               <div className="relative bg-card rounded-3xl p-5 shadow-2xl">
                 <div className="grid grid-cols-2 gap-4">
-                  
                   <div className="aspect-square rounded-2xl overflow-hidden shadow-sm">
                     <Image
                       src="/hero/vegetables.jpg"
@@ -105,7 +111,6 @@ export default function Hero() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-
                 </div>
               </div>
             </div>

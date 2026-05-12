@@ -67,11 +67,17 @@ export const formatCartPrice = (value) =>
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
 
-  
 export const searchProducts = async (query) => {
   // Use the 'api' instance we fixed with the token interceptor
   const response = await api.get(
     `/products/search?q=${encodeURIComponent(query)}`,
   );
   return response.data; // This returns { success: true, data: [...] }
+};
+
+export const clearCart = async () => {
+  const response = await api.delete("/cart"); // Adjust the endpoint to match your backend
+  const emptyCart = { items: [], totalPrice: 0 };
+  emitCartChange(emptyCart);
+  return emptyCart;
 };

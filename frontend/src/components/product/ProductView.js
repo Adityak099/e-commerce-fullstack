@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import AddToCartButton from "@/components/product/AddToCartButton";
+import Image from "next/image";
 
 const formatPrice = (price) =>
   new Intl.NumberFormat("en-IN", {
@@ -17,9 +18,11 @@ export default function ProductView({ product }) {
     <div className="grid gap-10 lg:grid-cols-[1fr_0.95fr] lg:gap-16">
       <section className="space-y-4">
         <div className="overflow-hidden rounded-[34px] bg-[rgba(255,253,248,0.9)] shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
-          <img
+          <Image
             src={selectedImage}
             alt={product.name}
+            width={500}
+            height={500}
             className="aspect-square h-full w-full object-cover"
           />
         </div>
@@ -31,21 +34,35 @@ export default function ProductView({ product }) {
               type="button"
               onClick={() => setSelectedImage(image)}
               className={`overflow-hidden rounded-[22px] border ${
-                selectedImage === image ? "border-[#1f3c88]" : "border-transparent"
+                selectedImage === image
+                  ? "border-[#1f3c88]"
+                  : "border-transparent"
               } bg-[rgba(255,253,248,0.86)]`}
             >
-              <img src={image} alt={product.name} className="aspect-square h-full w-full object-cover" />
+              <img
+                src={image}
+                alt={product.name}
+                className="aspect-square h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>
       </section>
 
       <section className="rounded-[34px] border border-white/70 bg-[rgba(255,253,248,0.85)] p-8 shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
-        <p className="text-sm uppercase tracking-[0.28em] text-[#8b5e3c]">{product.category}</p>
-        <h1 className="mt-4 font-serif text-5xl font-semibold text-[#1f2937]">{product.name}</h1>
-        <p className="mt-4 text-3xl font-semibold text-[#1f3c88]">{formatPrice(product.price)}</p>
+        <p className="text-sm uppercase tracking-[0.28em] text-[#8b5e3c]">
+          {product.category}
+        </p>
+        <h1 className="mt-4 font-serif text-5xl font-semibold text-[#1f2937]">
+          {product.name}
+        </h1>
+        <p className="mt-4 text-3xl font-semibold text-[#1f3c88]">
+          {formatPrice(product.price)}
+        </p>
 
-        <p className="mt-6 text-base leading-8 text-[#52606d]">{product.description}</p>
+        <p className="mt-6 text-base leading-8 text-[#52606d]">
+          {product.description}
+        </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
           {product.tags.map((tag) => (
@@ -66,7 +83,12 @@ export default function ProductView({ product }) {
         </div>
 
         <div className="mt-10 grid gap-4 border-t border-[#eadfcd] pt-6 text-sm text-[#52606d]">
-          <p>Availability: {product.stock > 0 ? `${product.stock} items ready to ship` : "Currently unavailable"}</p>
+          <p>
+            Availability:{" "}
+            {product.stock > 0
+              ? `${product.stock} items ready to ship`
+              : "Currently unavailable"}
+          </p>
           <p>Delivery: Same-day dispatch in supported local zones.</p>
           <p>Returns: Easy replacement support for damaged deliveries.</p>
         </div>

@@ -1,5 +1,9 @@
 import dotenv from "dotenv";
-dotenv.config();
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, ".env") });
 
 import express, { json } from "express";
 import cors from "cors";
@@ -23,7 +27,14 @@ connectDB(); // Connect to MongoDB
 ensureRedis();
 
 // 2. Global Middleware
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(json());
 
 // 3. API Routes

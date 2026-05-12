@@ -130,11 +130,56 @@ export const finalizeOrder = async (razorpayOrderId, paymentId) => {
  */
 export const getUserOrderHistory = async (userId) => {
   const query = `
-    SELECT id, total_price, status, razorpay_order_id, payment_id, created_at 
+    SELECT id, total_price, status, razorpay_order_id, payment_id, created_at
     FROM orders 
     WHERE user_id = $1 
     ORDER BY created_at DESC
   `;
   const result = await pool.query(query, [userId]);
-  return result.rows;
+  return result.rows.map((order) => ({
+    id: order.id,
+    _id: order.id,
+    totalAmount: Number(order.total_price),
+    totalPrice: Number(order.total_price),
+    status: order.status,
+    razorpayOrderId: order.razorpay_order_id,
+    paymentId: order.payment_id,
+    createdAt: order.created_at,
+  }));
+};
+
+/**
+ * 4. Fetch one order with its item snapshot
+ */
+export const getUserOrderById = async (userId, orderId) => {
+  const query = `
+    SELECT id, total_price, status, razorpay_order_id, payment_id, created_at, shipping_address
+    FROM orders
+    WHERE user_id = $1 AND id = $2
+    LIMIT 1;
+  `;
+  const result = await pool.query(query, [userId, orderId]);
+
+  if (result.rowCount === 0) {
+    return null;
+  }
+
+  const order = result.rows[0];
+  const snapshot = await OrderSnapshotSchema.findOne({
+    pgOrderId: order.id,
+    userId,
+  }).lean();
+
+  return {
+    id: order.id,
+    _id: order.id,
+    totalAmount: Number(order.total_price),
+    totalPrice: Number(order.total_price),
+    status: order.status,
+    razorpayOrderId: order.razorpay_order_id,
+    paymentId: order.payment_id,
+    shippingAddress: snapshot?.shippingAddress || order.shipping_address,
+    items: snapshot?.items || [],
+    createdAt: order.created_at,
+  };
 };

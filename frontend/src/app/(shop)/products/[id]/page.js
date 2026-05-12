@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import ProductView from "@/components/product/ProductView";
+import Container from "@/components/ui/Container";
 import { getProductById } from "@/services/product.Service";
 
 export default async function ProductDetailPage({ params }) {
@@ -11,8 +12,10 @@ export default async function ProductDetailPage({ params }) {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <ProductView product={product} />
+    <main className="py-10">
+      <Container>
+        <ProductView product={product} />
+      </Container>
     </main>
   );
 }

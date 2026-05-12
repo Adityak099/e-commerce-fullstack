@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, ArrowLeft, Trash2 } from "lucide-react";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/hooks/useCart";
+import Container from "@/components/ui/Container";
 import {
   formatCartPrice,
   removeCartItem,
@@ -16,14 +17,7 @@ export default function CartPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center gap-2 mb-8">
-          <Link href="/" className="text-primary hover:text-primary/80">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <h1 className="text-4xl font-bold text-foreground">Shopping Cart</h1>
-        </div>
-
+      <Container className="py-12">
         {isLoading ? (
           <div className="flex items-center justify-center h-96">
             <p className="text-lg font-medium text-gray-600">Loading cart...</p>
@@ -38,7 +32,7 @@ export default function CartPage() {
               Start shopping to add products to your cart
             </p>
             <Link
-              href="/products"
+              href="/"
               className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               Shop Now
@@ -199,7 +193,7 @@ export default function CartPage() {
             </aside>
           </div>
         )}
-      </div>
+      </Container>
     </main>
   );
 }

@@ -60,11 +60,14 @@ const extractProducts = async (response) => {
 };
 
 export const getProducts = async () => {
-  const response = await fetch(`${API_URL}/products`, {
-    cache: "no-store",
-  });
-
-  return extractProducts(response);
+  try {
+    // This automatically uses http://localhost:5000/api
+    const response = await api.get("/products"); 
+    return response.data.data; 
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
 };
 
 export const getFeaturedProducts = async (limit = 4) => {

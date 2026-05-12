@@ -19,7 +19,8 @@ export const authenticateToken = async (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(403).json({ error: "Invalid token!" });
+    console.error("JWT Verification Error:", err.message); // THIS WILL TELL YOU THE TRUTH
+    res.status(403).json({ error: "Invalid token!", details: err.message });
   }
 };
 

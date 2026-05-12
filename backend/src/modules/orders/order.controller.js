@@ -83,3 +83,26 @@ export const getOrderHistory = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// Getting a single order of the logged-in user
+export const getOrderById = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { id } = req.params;
+    const order = await orderService.getUserOrderById(userId, id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: "Order not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

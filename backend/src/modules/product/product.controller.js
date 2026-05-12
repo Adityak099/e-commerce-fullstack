@@ -23,13 +23,26 @@ export const createNewProduct = async (req, res) => {
 };
 
 /**
- * @desc    Get all active products (Public)
+ * @desc    Get all active products with optional category filter
  * @route   GET /api/products
  */
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await productService.listAllProducts();
-    res.status(200).json({ success: true, data: products });
+    const { category } = req.query;
+    let products;
+
+    if (category) {
+      // If a category is provided, filter specifically for it
+      // Using regex "i" ensures "dairy" matches "Dairy"
+      products = await Product.find({ 
+        category: { $regex: category, $options: "i" } 
+      });
+    } else {
+      // Otherwise, use your existing service to list all
+      products = await productService.listAllProducts();
+    }
+
+    res.status(200).json({ success: true, count: products.length, data: products });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
