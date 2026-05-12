@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import ProductCard from "@/components/product/ProductCard";
 import Container from "@/components/ui/Container";
+import { normalizeProduct } from "@/services/product.Service";
 
 // Matches the categories in the sidebar of image_0112d8.jpg
 const SIDEBAR_CATEGORIES = [
-  { name: "Fresh Vegetables", slug: "vegetables", icon: "🥦" },
-  { name: "Fresh Fruits", slug: "fruits", icon: "🍎" },
+  { name: "Fruits & Vegetables", slug: "fruits", icon: "🥦" },
   { name: "Dairy & Bread", slug: "dairy", icon: "🥛" },
   { name: "Beverages", slug: "beverages", icon: "🥤" },
   { name: "Snacks", slug: "snacks", icon: "🍿" },
-  { name: "Exotics", slug: "exotics", icon: "🍍" }
+  { name: "Bakery", slug: "bakery", icon: "🥐" },
+  { name: "Grains", slug: "grains", icon: "🌾" },
+  { name: "Spices", slug: "spices", icon: "🌶️" },
 ];
 
 export default function ProductsPage() {
@@ -27,7 +29,8 @@ export default function ProductsPage() {
         setLoading(true);
         setError("");
         const res = await api.get(`/products?category=${selectedCategory}`);
-        setProducts(res.data.data || []);
+        const rawProducts = res.data.data || [];
+        setProducts(rawProducts.map(normalizeProduct).filter(Boolean));
       } catch (error) {
         setError("Products are temporarily unavailable right now.");
         console.error("Filter failed", error);
@@ -79,7 +82,7 @@ export default function ProductsPage() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {products.map((item) => (
-                <ProductCard key={item._id} product={item} />
+                <ProductCard key={item._id || item.id} product={item} />
               ))}
             </div>
           )}

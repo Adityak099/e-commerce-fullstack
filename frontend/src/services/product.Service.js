@@ -2,6 +2,24 @@ import api from "@/lib/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+const CATEGORY_IMAGES = {
+  fruits: "/categories/fruits-vegetables.jpg",
+  dairy: "/categories/dairy.jpg",
+  beverages: "/categories/drinks.jpg",
+  snacks: "/categories/snacks.jpg",
+  bakery: "/categories/bakery.jpg",
+  grains: "/categories/grains.jpg",
+  spices: "/categories/spices.jpg",
+  cleaning: "/categories/cleaning.jpg",
+  "personal-care": "/categories/personal-care.jpg",
+  "baby-care": "/categories/baby-care.png",
+  "pet-care": "/categories/pet-care.png",
+  "home-kitchen": "/categories/home-kitchen.png",
+  electronics: "/categories/electronics.png",
+  fashion: "/categories/fashion.png",
+  toys: "/categories/toy.png",
+};
+
 const buildImageList = (images) => {
   if (!Array.isArray(images) || images.length === 0) {
     return [];
@@ -18,13 +36,15 @@ const buildImageList = (images) => {
     .filter(Boolean);
 };
 
-const normalizeProduct = (product) => {
+export const normalizeProduct = (product) => {
   if (!product) {
     return null;
   }
 
   const images = buildImageList(product.images);
   const fallbackCategory = product.category || "General";
+  const fallbackImage =
+    CATEGORY_IMAGES[fallbackCategory] || "/categories/Demo-Image.svg";
   const stock = Number(product.inventory?.stock ?? product.stock ?? 0);
 
   return {
@@ -35,8 +55,8 @@ const normalizeProduct = (product) => {
     price: Number(product.price || 0),
     category: fallbackCategory,
     seller: product.seller || null,
-    image: images[0] || "/categories/Demo-Image.svg",
-    images: images.length > 0 ? images : ["/categories/Demo-Image.svg"],
+    image: fallbackImage,
+    images: images.length > 0 ? images : [fallbackImage],
     stock,
     tags: [
       fallbackCategory,
@@ -61,9 +81,9 @@ const extractProducts = async (response) => {
 
 export const getProducts = async () => {
   try {
-    // This automatically uses http://localhost:5000/api
     const response = await api.get("/products"); 
-    return response.data.data; 
+    const rawProducts = response.data?.data || [];
+    return rawProducts.map(normalizeProduct).filter(Boolean);
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;
