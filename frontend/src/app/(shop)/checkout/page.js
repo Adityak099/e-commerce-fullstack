@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import Container from "@/components/ui/Container";
 import Button from "@/components/ui/Button";
-import { getCart } from "@/services/cart.Service";
+import { getCart } from "@/services/cart.service";
 
 const loadRazorpayScript = () =>
   new Promise((resolve) => {

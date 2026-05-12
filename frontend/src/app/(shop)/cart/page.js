@@ -9,7 +9,7 @@ import {
   formatCartPrice,
   removeCartItem,
   updateCartItemQuantity,
-} from "@/services/cart.Service";
+} from "@/services/cart.service";
 
 export default function CartPage() {
   const { cart, isLoading } = useCart();

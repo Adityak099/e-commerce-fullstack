@@ -7,7 +7,7 @@ import {
   addToCart,
   removeCartItem,
   updateCartItemQuantity,
-} from "@/services/cart.Service";
+} from "@/services/cart.service";
 import { useCart } from "@/hooks/useCart";
 
 export default function AddToCartButton({ product, className = "" }) {
